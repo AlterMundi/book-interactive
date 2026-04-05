@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIT — Teoría de la Información Armónica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0c0e1a;
+      --surface:    #11131f;
+      --card:       #181b2e;
+      --card-hover: #1e2138;
+      --border:     #252840;
+      --text:       #dcd9ef;
+      --muted:      #7874a2;
+      --dim:        #3f3d60;
+
+      --nucleo:    #818cf8;
+      --hipotesis: #fbbf24;
+      --activacion:#f87171;
+      --sonda:     #22d3ee;
+      --epistemo:  #fb923c;
+      --tech:      #34d399;
+
+      --sidebar-w: 264px;
+      --detail-w:  430px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    header {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 200;
+    }
+
+    .logo {
+      font-family: 'Crimson Pro', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--nucleo);
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .logo em {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 10px;
+      letter-spacing: 0;
+    }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 340px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 2;
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 7px 10px 7px 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input::placeholder { color: var(--dim); }
+    .search-wrap input:focus { border-color: var(--nucleo); }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-left: auto;
+    }
+    .tab-btn {
+      padding: 6px 15px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 6px;
+      letter-spacing: 0.01em;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { background: var(--card); color: var(--text); }
+    .tab-btn.active { background: var(--card); color: var(--nucleo); font-weight: 500; }
+
+    /* ── LAYOUT ──────────────────────────────────────── */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 14px 0 24px;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .s-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--dim);
+      padding: 0 16px;
+      margin-bottom: 5px;
+    }
+
+    .s-section { margin-bottom: 18px; }
+
+    .cat-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 5px 16px;
+      cursor: pointer;
+      font-size: 12.5px;
+      color: var(--muted);
+      transition: all 0.15s;
+      user-select: none;
+      border-radius: 0;
+    }
+    .cat-row:hover { background: var(--card); color: var(--text); }
+    .cat-row.active { background: var(--card); color: var(--text); }
+
+    .cat-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cat-count { margin-left: auto; font-size: 10px; color: var(--dim); }
+
+    .s-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 16px 14px;
+    }
+
+    .book-part { }
+    .part-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 16px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--muted);
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .part-row:hover { background: var(--card); color: var(--text); }
+
+    .part-arrow {
+      font-size: 7px;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      color: var(--dim);
+    }
+    .book-part.open .part-arrow { transform: rotate(90deg); }
+    .part-chs { display: none; }
+    .book-part.open .part-chs { display: block; }
+
+    .ch-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 16px 4px 28px;
+      cursor: pointer;
+      font-size: 11.5px;
+      color: var(--dim);
+      transition: all 0.15s;
+    }
+    .ch-row:hover { background: var(--card); color: var(--muted); }
+    .ch-row.active { color: var(--text); }
+    .ch-n { font-size: 9.5px; font-weight: 700; color: var(--dim); width: 18px; flex-shrink: 0; }
+
+    /* ── MAIN ────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+    .tab-pane.active { display: block; }
+
+    /* MAP */
+    #pane-map { overflow: hidden; cursor: grab; }
+    #pane-map:active { cursor: grabbing; }
+    #pane-map svg { width: 100%; height: 100%; }
+
+    .g-link {
+      stroke: var(--border);
+      stroke-width: 1.2;
+      stroke-opacity: 0.7;
+      transition: stroke 0.2s, stroke-opacity 0.2s;
+    }
+    .g-link.hi { stroke: var(--nucleo); stroke-opacity: 1; stroke-width: 1.8; }
+
+    .g-node circle {
+      cursor: pointer;
+      transition: filter 0.2s, opacity 0.2s;
+    }
+    .g-node circle:hover { filter: brightness(1.4); }
+    .g-node text {
+      font-family: 'Inter', sans-serif;
+      fill: var(--text);
+      pointer-events: none;
+      user-select: none;
+    }
+    .g-node.dimmed circle { opacity: 0.25; }
+    .g-node.dimmed text { opacity: 0.25; }
+
+    /* LIBRO */
+    #pane-libro {
+      overflow-y: auto;
+      padding: 32px 36px;
+    }
+    #pane-libro::-webkit-scrollbar { width: 5px; }
+    #pane-libro::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .libro-h { font-family: 'Crimson Pro', serif; font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+    .libro-sub { color: var(--muted); font-size: 13px; margin-bottom: 36px; }
+
+    .parts-grid { display: grid; gap: 20px; }
+
+    .part-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .part-card-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pnum {
+      font-family: 'Crimson Pro', serif;
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--border);
+      line-height: 1;
+      width: 50px;
+      flex-shrink: 0;
+    }
+    .pinfo h3 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .pinfo p { font-size: 11.5px; color: var(--muted); }
+
+    .chs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+    .ch-card {
+      background: var(--card);
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .ch-card:hover { background: var(--card-hover); }
+    .ch-tag { font-size: 9.5px; font-weight: 700; color: var(--dim); letter-spacing: 0.07em; margin-bottom: 5px; }
+    .ch-title { font-size: 12.5px; font-weight: 500; line-height: 1.4; }
+
+    /* ÍNDICE */
+    #pane-indice {
+      overflow-y: auto;
+      padding: 22px;
+    }
+    #pane-indice::-webkit-scrollbar { width: 5px; }
+    #pane-indice::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .concepts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px;
+    }
+    .concept-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid transparent;
+      border-radius: 9px;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .concept-card:hover { background: var(--card-hover); transform: translateY(-1px); }
+    .concept-card.nucleo    { border-left-color: var(--nucleo); }
+    .concept-card.hipotesis { border-left-color: var(--hipotesis); }
+    .concept-card.activacion{ border-left-color: var(--activacion); }
+    .concept-card.sonda     { border-left-color: var(--sonda); }
+    .concept-card.epistemo  { border-left-color: var(--epistemo); }
+    .concept-card.tech      { border-left-color: var(--tech); }
+
+    .cc-label { font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
+    .cc-sub   { font-size: 11.5px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+    .cc-tag {
+      display: inline-block;
+      font-size: 9.5px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .cc-tag.nucleo    { background: rgba(129,140,248,.14); color: var(--nucleo); }
+    .cc-tag.hipotesis { background: rgba(251,191,36,.14);  color: var(--hipotesis); }
+    .cc-tag.activacion{ background: rgba(248,113,113,.14); color: var(--activacion); }
+    .cc-tag.sonda     { background: rgba(34,211,238,.14);  color: var(--sonda); }
+    .cc-tag.epistemo  { background: rgba(251,146,60,.14);  color: var(--epistemo); }
+    .cc-tag.tech      { background: rgba(52,211,153,.14);  color: var(--tech); }
+
+    /* ── DETAIL PANEL ────────────────────────────────── */
+    .detail {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: var(--detail-w);
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      transform: translateX(100%);
+      transition: transform 0.26s ease;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+    .detail.open { transform: translateX(0); }
+    .detail::-webkit-scrollbar { width: 3px; }
+    .detail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .d-head {
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      z-index: 1;
+    }
+    .d-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 26px; height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card);
+      border: none;
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+    .d-close:hover { background: var(--card-hover); color: var(--text); }
+
+    .d-cat {
+      display: inline-block;
+      font-size: 9.5px;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+    .d-title {
+      font-family: 'Crimson Pro', serif;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+    .d-sub { font-size: 12px; color: var(--muted); }
+
+    .d-body { padding: 20px 22px 32px; flex: 1; }
+
+    .d-body h2 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 22px 0 8px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .d-body h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .d-body h3 { font-size: 13px; font-weight: 600; margin: 14px 0 5px; }
+    .d-body p { font-size: 12.5px; line-height: 1.75; color: var(--muted); margin-bottom: 9px; }
+    .d-body ul, .d-body ol { padding-left: 18px; margin-bottom: 9px; }
+    .d-body li { font-size: 12.5px; line-height: 1.75; color: var(--muted); margin-bottom: 3px; }
+    .d-body blockquote {
+      border-left: 2px solid var(--nucleo);
+      padding: 8px 14px;
+      margin: 12px 0;
+      background: rgba(129,140,248,0.06);
+      border-radius: 0 6px 6px 0;
+    }
+    .d-body blockquote p { color: var(--text); font-style: italic; margin: 0; }
+    .d-body table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin: 10px 0; }
+    .d-body th { text-align: left; padding: 7px 9px; background: var(--card); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    .d-body td { padding: 6px 9px; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .d-body pre {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 12px;
+      margin: 10px 0;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .d-body code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; background: var(--card); padding: 1px 5px; border-radius: 4px; color: var(--sonda); }
+
+    .related {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .related-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--dim);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .related-links { display: flex; flex-wrap: wrap; gap: 5px; }
+    .rel-link {
+      display: inline-block;
+      font-size: 11.5px;
+      padding: 3px 10px;
+      background: rgba(129,140,248,0.1);
+      color: var(--nucleo);
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .rel-link:hover { background: rgba(129,140,248,0.2); }
+
+    /* ── LEGEND ─────────────────────────────────────── */
+    .map-legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      z-index: 10;
+    }
+    .leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+    .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .map-hint {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-size: 10.5px;
+      color: var(--dim);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">HIT <em>Teoría de la Información Armónica</em></div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
+    <input type="text" id="search-input" placeholder="Buscar concepto o capítulo…" autocomplete="off">
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="map">Mapa</button>
+    <button class="tab-btn" data-tab="libro">Libro</button>
+    <button class="tab-btn" data-tab="indice">Índice</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="s-section">
+      <div class="s-title">Categorías</div>
+      <div class="cat-row active" data-cat="all">
+        <span class="cat-dot" style="background:var(--dim)"></span>
+        Todos
+        <span class="cat-count" id="cnt-all"></span>
+      </div>
+      <div class="cat-row" data-cat="nucleo">
+        <span class="cat-dot" style="background:var(--nucleo)"></span>
+        Núcleo teórico
+        <span class="cat-count" id="cnt-nucleo"></span>
+      </div>
+      <div class="cat-row" data-cat="hipotesis">
+        <span class="cat-dot" style="background:var(--hipotesis)"></span>
+        Hipótesis
+        <span class="cat-count" id="cnt-hipotesis"></span>
+      </div>
+      <div class="cat-row" data-cat="activacion">
+        <span class="cat-dot" style="background:var(--activacion)"></span>
+        Activación
+        <span class="cat-count" id="cnt-activacion"></span>
+      </div>
+      <div class="cat-row" data-cat="sonda">
+        <span class="cat-dot" style="background:var(--sonda)"></span>
+        Sondas
+        <span class="cat-count" id="cnt-sonda"></span>
+      </div>
+      <div class="cat-row" data-cat="epistemo">
+        <span class="cat-dot" style="background:var(--epistemo)"></span>
+        Epistemología
+        <span class="cat-count" id="cnt-epistemo"></span>
+      </div>
+      <div class="cat-row" data-cat="tech">
+        <span class="cat-dot" style="background:var(--tech)"></span>
+        Tecnología
+        <span class="cat-count" id="cnt-tech"></span>
+      </div>
+    </div>
+
+    <div class="s-divider"></div>
+
+    <div class="s-section">
+      <div class="s-title">Estructura del libro</div>
+      <div id="book-tree"></div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- MAP PANE -->
+    <div id="pane-map" class="tab-pane active">
+      <svg id="fg"></svg>
+      <div class="map-legend" id="map-legend"></div>
+      <div class="map-hint">Scroll = zoom · Drag nodo = mover · Click fondo = resetear</div>
+    </div>
+
+    <!-- LIBRO PANE -->
+    <div id="pane-libro" class="tab-pane">
+      <h1 class="libro-h">Harmonic Information Theory</h1>
+      <p class="libro-sub">Programa de investigación transdisciplinar — 6 partes, 16 capítulos</p>
+      <div class="parts-grid" id="parts-grid"></div>
+    </div>
+
+    <!-- ÍNDICE PANE -->
+    <div id="pane-indice" class="tab-pane">
+      <div class="concepts-grid" id="concepts-grid"></div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail" id="detail">
+      <div class="d-head">
+        <button class="d-close" id="d-close">✕</button>
+        <div class="d-cat" id="d-cat"></div>
+        <h2 class="d-title" id="d-title"></h2>
+        <p class="d-sub" id="d-sub"></p>
+      </div>
+      <div class="d-body" id="d-body"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ================================================================
+// DATA
+// ================================================================
+
+const CAT = {
+  nucleo:    { label: 'Núcleo teórico',  color: '#818cf8' },
+  hipotesis: { label: 'Hipótesis',       color: '#fbbf24' },
+  activacion:{ label: 'Activación',      color: '#f87171' },
+  sonda:     { label: 'Sondas',          color: '#22d3ee' },
+  epistemo:  { label: 'Epistemología',   color: '#fb923c' },
+  tech:      { label: 'Tecnología',      color: '#34d399' },
+};
+
+const CONCEPTS = [
+  {
+    id:'HIT', label:'HIT', subtitle:'Teoría de la Información Armónica',
+    cat:'nucleo', sz:22,
+    links:['Intervalo','Consonancia','Hipotesis-HIT','Phideus','Beacon','Epistemologia','Armonianatural'],
+    body:`
+<h2>La pregunta central</h2>
+<p>¿Pueden las relaciones proporcionales entre frecuencias constituir un nivel de organización informacional irreductible al nivel de los elementos individuales?</p>
+<p>HIT no responde afirmando ingenuamente que "la armonía es universal". Lo hace construyendo un <strong>programa investigativo</strong> con hipótesis falsificables, sondas empíricas y marcos epistemológicos explícitos.</p>
+<h2>Estructura del programa</h2>
+<ol>
+<li><strong>Part I</strong> — Motivación: ¿por qué importa la armonía más allá de la música?</li>
+<li><strong>Part II</strong> — Fundamentos ontológicos: Intervalo como portador mínimo, Consonancia como función relacional</li>
+<li><strong>Part III</strong> — Convergencia empírica en 7 dominios</li>
+<li><strong>Part IV</strong> — Teoría: Armonía natural, Recurrencia, Sentido de la consonancia, Problema de la activación</li>
+<li><strong>Part V</strong> — Sondas: Phideus (computacional) y Beacon (experiencial)</li>
+<li><strong>Part VI</strong> — Alcance, límites, agenda futura y aplicaciones</li>
+</ol>
+<h2>Las seis hipótesis centrales</h2>
+<ul>
+<li><strong>H1</strong>: Las distribuciones de razones en señales reales muestran estructura no aleatoria</li>
+<li><strong>H2</strong>: Esa estructura es aprendible por sistemas computacionales</li>
+<li><strong>H3</strong>: Existe estructura compartida entre dominios modales</li>
+<li><strong>H4</strong>: Las razones simples minimizan el costo de procesamiento</li>
+<li><strong>H5</strong>: Los sistemas biológicos son sensibles a la consonancia</li>
+<li><strong>H6</strong>: La razón es el portador escala-invariante</li>
+</ul>
+<h2>Lo que HIT no es</h2>
+<ul>
+<li>No es pitagorismo — no afirma que los números gobiernan la realidad</li>
+<li>No es universalismo ingenuo — reconoce variación cultural y contextual</li>
+<li>No es teoría cerrada — es un programa con falsificadores explícitos</li>
+<li>No es psicoterapia ni reduccionismo</li>
+</ul>`
+  },
+  {
+    id:'Intervalo', label:'Intervalo', subtitle:'Portador informacional mínimo',
+    cat:'nucleo', sz:16,
+    links:['HIT','Consonancia','Armonianatural','Recurrencia','Hipotesis-HIT'],
+    body:`
+<h2>Por qué el intervalo y no la nota</h2>
+<p>El <strong>intervalo</strong> —la razón proporcional entre dos frecuencias— es la unidad ontológica mínima de HIT. No la nota. No la frecuencia absoluta. La <em>relación</em>.</p>
+<ol>
+<li><strong>Irreductiblemente relacional</strong>: requiere al menos dos términos y una razón entre ellos</li>
+<li><strong>Escala-invariante</strong>: si se transpone, los intervalos se preservan exactamente</li>
+<li><strong>Generativo</strong>: de razones simples emergen estructuras complejas (2:1 = octava; 3:2 = quinta; 5:4 = tercera mayor)</li>
+<li><strong>Contextualmente diferencial</strong>: la misma razón funciona distinto según el contexto modal</li>
+</ol>
+<h2>Intervalo y recurrencia</h2>
+<p>Dos osciladores con razón p:q regresan a su estado inicial con frecuencia f = p·q·f₀. Las razones simples producen mayor densidad de recurrencia → menor carga correctiva.</p>
+<h2>La proposición ontológica mínima</h2>
+<blockquote><p>Si existe información armónica, su portador mínimo es la razón relacional, no el elemento absoluto.</p></blockquote>`
+  },
+  {
+    id:'Consonancia', label:'Consonancia', subtitle:'Función relacional',
+    cat:'nucleo', sz:15,
+    links:['HIT','Intervalo','Armonianatural','Recurrencia','Beacon','Phideus','SentidoConsonancia'],
+    body:`
+<h2>La posición de HIT</h2>
+<p>En HIT, la consonancia no es una propiedad intrínseca de razones aisladas. Es una <strong>función</strong>:</p>
+<blockquote><p>Consonancia = F(razón, constitución modal, medio, régimen de acoplamiento, receptor, contexto)</p></blockquote>
+<p>HIT rechaza el esencialismo pitagórico ("las razones simples son consonantes por naturaleza") y el relativismo cultural radical ("la consonancia es solo convención").</p>
+<h2>La estabilidad dinámica como criterio</h2>
+<p>Una relación es más consonante en la medida en que <strong>produce o sostiene estabilidad dinámica</strong> en el sistema acoplado. Medible mediante: ancho de lenguas de Arnold, densidad en la Matriz de Recurrencia (RP), varianza de energía de error, tiempo de phase-locking.</p>
+<h2>Cada sistema tiene su propia armonía natural</h2>
+<p>Siguiendo a Sethares (2005): los parciales de diferentes timbres crean diferentes "ecologías de consonancia". Esta relatividad al sistema no cancela la objetividad de la consonancia — la hace dependiente del contexto, lo cual es diferente a hacerla arbitraria.</p>`
+  },
+  {
+    id:'Armonianatural', label:'Armonía Natural', subtitle:'vs. armonía perceptual',
+    cat:'nucleo', sz:14,
+    links:['HIT','Consonancia','Intervalo','Recurrencia','Eficiencia','Phideus'],
+    body:`
+<h2>La distinción fundamental</h2>
+<p><strong>Armonía natural</strong> refiere a las relaciones proporcionales medidas en el dominio físico: las razones entre frecuencias tal como ocurren en la señal, independientemente de cómo sean percibidas por el sistema auditivo humano.</p>
+<h2>Por qué importa la distinción</h2>
+<p>La armonía perceptual está mediada por bandas críticas, enmascaramiento, roughness — mecanismos del sistema auditivo humano. La armonía natural opera en un nivel más fundamental: es la estructura proporcional que cualquier sistema de procesamiento (biológico o computacional) podría detectar.</p>
+<p>HIT apuesta a que la armonía natural, no la perceptual, es el nivel donde opera la información armónica como portador cross-modal.</p>
+<h2>Implicaciones para Phideus</h2>
+<p>Los descriptores D4, A4, V4-lin, V4-log y H-series operan sobre la señal cruda en Hz reales, no sobre representaciones perceptuales como mel-espectrogramas. Esta elección refleja directamente la apuesta teórica.</p>`
+  },
+  {
+    id:'Recurrencia', label:'Recurrencia', subtitle:'Eficiencia informacional',
+    cat:'nucleo', sz:14,
+    links:['Intervalo','Consonancia','Armonianatural','Eficiencia','Hipotesis-HIT'],
+    body:`
+<h2>El principio de recurrencia</h2>
+<p>Cuando dos osciladores con razón p:q se acoplan, el sistema conjunto regresa periódicamente a su estado inicial. Las razones simples (pequeños p y q) producen mayor frecuencia de recurrencia → mayor densidad de puntos en la Matriz de Recurrencia (RP) → menor carga correctiva.</p>
+<h2>Recurrencia y eficiencia predictiva</h2>
+<p>La hipótesis: las razones simples son procesadas más eficientemente porque producen patrones más predecibles. Un sistema biológico expuesto a razones simples necesita menos energía correctiva para mantener la predicción actualizada.</p>
+<p>Esta es la cadena teórica central: razón simple → alta recurrencia → alta eficiencia predictiva → menor carga → respuesta fisiológica diferencial (H4, H5).</p>
+<h2>RQA como herramienta</h2>
+<p>El Recurrence Quantification Analysis (RQA) permite medir directamente la densidad de recurrencia. Trulla et al. (2018) encontraron estructura armónica significativa usando RQA en señales acústicas — evidencia directa de H1.</p>`
+  },
+  {
+    id:'Phi', label:'φ — Razón Áurea', subtitle:'Y el problema de la activación',
+    cat:'activacion', sz:12,
+    links:['Jpsh','ProblemaActivacion','Intervalo','Recurrencia'],
+    body:`
+<h2>φ en HIT</h2>
+<p>La razón áurea φ = (1+√5)/2 ≈ 1.618 ocupa una posición peculiar: no es la "razón más consonante" (su irracionalidad produce baja recurrencia) sino la razón que <strong>maximiza la inestabilidad armónica</strong>.</p>
+<h2>La paradoja de φ</h2>
+<p>φ es la razón más alejada de toda fracción simple — el punto del espacio de razones más resistente al bloqueo de fase. En los sistemas dinámicos, φ aparece en los tori KAM más resistentes al caos.</p>
+<p>Si la armonía natural es eficiente, ¿cómo explicar que φ aparezca en sistemas naturales (filotaxis, espirales de conchas)?</p>
+<h2>La hipótesis de activación</h2>
+<p>La posición de HIT: φ no es un portador armónico sino un <strong>mecanismo de activación</strong>. El sistema se mantiene en estado de máxima disponibilidad (nunca "capturado" por bloqueo de fase) justamente porque φ evita la resonancia. El Jpsh ocurre cuando ese estado de disponibilidad máxima encuentra una razón simple.</p>`
+  },
+  {
+    id:'Jpsh', label:'Jpsh', subtitle:'El evento de activación',
+    cat:'activacion', sz:11,
+    links:['Phi','ProblemaActivacion','Beacon','Intervalo'],
+    body:`
+<h2>¿Qué es Jpsh?</h2>
+<p><strong>Jpsh</strong> es el nombre dado en HIT al evento de activación armónica: el momento en que un sistema en estado de máxima disponibilidad (φ-estabilizado) entra en contacto con una razón simple y ocurre un cambio de fase discreto.</p>
+<h2>El carácter del evento</h2>
+<p>Jpsh no es gradual sino discreto: hay un umbral, un salto, una transición de fase. Antes: disponibilidad. Después: bloqueo en una razón simple.</p>
+<h2>La pregunta abierta</h2>
+<p>¿Puede el Jpsh ser provocado deliberadamente? ¿Es eso lo que hace el Beacon: generar las condiciones para que ocurra más fácilmente? ¿O el Jpsh es irreduciblemente contingente? Esta es una de las preguntas abiertas del programa.</p>`
+  },
+  {
+    id:'ProblemaActivacion', label:'Problema de la Activación', subtitle:'El núcleo no resuelto',
+    cat:'activacion', sz:13,
+    links:['Phi','Jpsh','Beacon','SentidoConsonancia','Hipotesis-HIT'],
+    body:`
+<h2>El problema</h2>
+<p>Dado que las razones simples son informacionalmente eficientes, ¿qué determina <em>cuándo</em> y <em>cómo</em> un sistema comienza a operar en el dominio armónico?</p>
+<h2>Por qué es difícil</h2>
+<p>No basta con exponer un sistema a razones simples para que "se active". La respuesta biológica depende de historia, estado, umbral. El Beacon genera el campo, pero no garantiza la respuesta — y eso no es un defecto del Beacon sino una propiedad del problema.</p>
+<h2>Relación con φ y Jpsh</h2>
+<p>φ puede ser el mecanismo por el cual los sistemas naturales se mantienen en estado de disponibilidad para el Jpsh. Si φ maximiza la no-captura de fase, el sistema permanece en un estado de "apertura máxima".</p>
+<h2>Implicaciones experimentales</h2>
+<p>El protocolo del Beacon no puede ser simple exposición pasiva — debe incluir condiciones de "preparación del sistema" que favorezcan el estado φ antes de la exposición a campo armónico consonante.</p>`
+  },
+  {
+    id:'Hipotesis-HIT', label:'H1 – H6', subtitle:'Las seis hipótesis centrales',
+    cat:'hipotesis', sz:18,
+    links:['HIT','Phideus','Beacon','Recurrencia','Eficiencia','SentidoConsonancia','EvidenciaArquitectura'],
+    body:`
+<h2>H1 — Distribuciones Estructuradas</h2>
+<blockquote><p>Las distribuciones de razones en señales reales muestran estructura no aleatoria.</p></blockquote>
+<p><strong>Falsificador</strong>: análisis espectral de grandes corpus reales no mostraría desvío significativo de distribuciones de control aleatorio.</p>
+<h2>H2 — Aprendibilidad Computacional</h2>
+<blockquote><p>La estructura armónica es aprendible por sistemas computacionales.</p></blockquote>
+<p><strong>Respaldo</strong>: Phideus E1 — 84.1% recuperación vs. 75.2% baseline. d de Cohen = 4.50.</p>
+<h2>H3 — Estructura Cross-Modal</h2>
+<blockquote><p>La estructura armónica es compartida entre dominios modales.</p></blockquote>
+<p><strong>Falsificador</strong>: rendimiento cross-modal no superaría el de modelos entrenados y probados en el mismo dominio.</p>
+<h2>H4 — Costo de Procesamiento Reducido</h2>
+<blockquote><p>Las razones simples minimizan el costo de procesamiento en sistemas biológicos.</p></blockquote>
+<p><em>Conjuntura mayor del programa.</em></p>
+<h2>H5 — Sensibilidad Biológica a la Consonancia</h2>
+<blockquote><p>Los sistemas biológicos son sensibles a la consonancia.</p></blockquote>
+<p><em>La otra conjuntura mayor.</em></p>
+<h2>H6 — Escala-Invariancia</h2>
+<blockquote><p>La razón es el portador escala-invariante.</p></blockquote>
+<h2>Jerarquía de hipótesis</h2>
+<pre>H6 (portador) → H1 (existe en señales reales)
+                   ↓
+             H2 (aprendible computacionalmente)
+                   ↓
+             H3 (cross-modal)
+                   ↓
+             H4 + H5 (respuesta biológica) ← conjeturas mayores</pre>`
+  },
+  {
+    id:'Phideus', label:'Phideus', subtitle:'Sonda computacional — dual-encoder',
+    cat:'sonda', sz:19,
+    links:['HIT','Beacon','Armonianatural','Hipotesis-HIT','Convergencia','HAT','PPU','EvidenciaArquitectura'],
+    body:`
+<h2>La pregunta que Phideus responde</h2>
+<blockquote><p>¿Reorganiza el espacio de representación la presencia de guía armónica? ¿Se organiza la geometría latente de manera sistemáticamente diferente cuando el modelo es entrenado con descriptores de armonía natural?</p></blockquote>
+<h2>Arquitectura: Dual-Encoder + VICReg</h2>
+<p>Dos ramas de codificación independientes. <strong>VICReg</strong> (Bardes, Ponce, LeCun, 2022) asegura Invarianza + Varianza + Covarianza, resolviendo el collapsing problem.</p>
+<h2>Los descriptores de armonía natural</h2>
+<table>
+<tr><th>Descriptor</th><th>Descripción</th></tr>
+<tr><td>D4</td><td>Densidad espectral en 4 bandas de armonía natural</td></tr>
+<tr><td>A4</td><td>Asimetría armónica en 4 rangos</td></tr>
+<tr><td>V4-lin</td><td>Varianza de distribución de parciales (lineal)</td></tr>
+<tr><td>V4-log</td><td>Varianza de distribución de parciales (log)</td></tr>
+<tr><td>H-series</td><td>Relaciones entre fundamental y parciales en Hz</td></tr>
+</table>
+<h2>Resultado central — Escalón 1</h2>
+<p><strong>84.1%</strong> recuperación con guía armónica vs. <strong>75.2%</strong> sin guía. <strong>d de Cohen = 4.50</strong> — efecto muy grande. La guía armónica <em>reorganiza la geometría del espacio de representación</em> de manera estadísticamente robusta.</p>
+<h2>Los cuatro Escalones</h2>
+<table>
+<tr><th>Escalón</th><th>Dominio A</th><th>Dominio B</th><th>Estado</th></tr>
+<tr><td>E1</td><td>Audio piano</td><td>MIDI</td><td>✓ Completado</td></tr>
+<tr><td>E2</td><td>Habla natural</td><td>EGG</td><td>En curso</td></tr>
+<tr><td>E3</td><td>Audio XY estéreo</td><td>Figura Lissajous</td><td>Planeado</td></tr>
+<tr><td>E4</td><td>ECG</td><td>PPG</td><td>Planeado</td></tr>
+</table>`
+  },
+  {
+    id:'Beacon', label:'Beacon Armónico', subtitle:'Sonda experiencial — campo armónico vivo',
+    cat:'sonda', sz:19,
+    links:['HIT','Phideus','PMP','HAT','Corazofono','OpenClaw','Phi','Jpsh','Convergencia'],
+    body:`
+<h2>Principio físico</h2>
+<p>El Beacon genera un campo de interferencia armónico vivo:</p>
+<pre>s(t) = Σₙ Aₙ cos(2π n f₀ t + φₙ)</pre>
+<p>donde fₙ = n·f₀: todas las relaciones entre componentes son razones de enteros pequeños.</p>
+<h2>Las cuatro generaciones del dispositivo</h2>
+<ol>
+<li><strong>Guitarra / Cuerda motorizada</strong> — Campo analógico puro; mayor fidelidad física</li>
+<li><strong>Diapasones / Pico Robot</strong> — Raspberry Pi Pico; mayor control de configuración</li>
+<li><strong>Digital / OSC Bank</strong> — Síntesis digital con OSC, orquestada por OpenClaw; máximo control paramétrico</li>
+<li><strong>App / Distribuido</strong> — Aplicación móvil; escalabilidad y acceso público</li>
+</ol>
+<h2>Las cuatro líneas experimentales</h2>
+<table>
+<tr><th>Línea</th><th>Medición</th></tr>
+<tr><td>Biosignal + calibración</td><td>HRV, electrodermal, respiración; Corazófono</td></tr>
+<tr><td>Respuesta fisiológica</td><td>Campo armónico vs. control</td></tr>
+<tr><td>Retroalimentación EEG</td><td>EEG como superficie de control para síntesis</td></tr>
+<tr><td>Figuras de Lissajous</td><td>Cymatografía; estructura proporcional visible</td></tr>
+</table>
+<h2>Calibración individual: Corazófono</h2>
+<p>Registra las frecuencias de resonancia del tórax del sujeto y ajusta el campo del Beacon. El Beacon calibrado es un campo <em>personalizado</em>, no genérico.</p>`
+  },
+  {
+    id:'PMP', label:'PMP', subtitle:'Proyección del Mito Personal',
+    cat:'sonda', sz:11,
+    links:['Beacon','Convergencia','Epistemologia','HIT'],
+    body:`
+<h2>¿Qué es el PMP?</h2>
+<p>La <strong>Proyección del Mito Personal</strong> (PMP, Julian De La Reta) es una técnica de trabajo psíquico basada en la psicología analítica junguiana: el sujeto proyecta y trabaja con su material simbólico (arquetipos, narrativa del monomito, imágenes del inconsciente).</p>
+<h2>PMP + Beacon</h2>
+<p>La sonda experimental combina PMP con exposición al campo del Beacon. La hipótesis: el campo armónico sostenido <strong>facilita el acceso</strong> al material simbólico y reduce la resistencia al proceso de individuación.</p>
+<p>Medición doble: biosignales durante la sesión + análisis de contenido del material simbólico producido.</p>
+<h2>Registro simbólico</h2>
+<p>PMP opera en el cuarto registro de HIT. Según la epistemología de la inconsistencia, tiene sus propias normas (psicología analítica, hermenéutica) que no pueden colapsarse con los otros registros.</p>`
+  },
+  {
+    id:'Convergencia', label:'Convergencia', subtitle:'Phideus — Beacon — PMP',
+    cat:'sonda', sz:13,
+    links:['Phideus','Beacon','PMP','EvidenciaArquitectura','Epistemologia'],
+    body:`
+<h2>El punto de convergencia</h2>
+<p>Las tres sondas atacan la misma pregunta desde registros radicalmente diferentes:</p>
+<ul>
+<li><strong>Phideus</strong>: geometría computacional del espacio de representación</li>
+<li><strong>Beacon</strong>: respuesta fisiológica y experiencial al campo armónico vivo</li>
+<li><strong>PMP</strong>: navegación del material simbólico bajo campo armónico</li>
+</ul>
+<h2>El objeto experimental compartido</h2>
+<p>La línea Lissajous (Escalón 3 de Phideus) crea el primer objeto experimental donde Phideus y Beacon se encuentran: las figuras de interferencia visibles del Beacon pueden analizarse con la arquitectura de Phideus.</p>
+<h2>Lo que la convergencia probaría</h2>
+<p>Si los tres registros —computacional, fisiológico, simbólico— muestran respuesta coherente a la misma estructura armónica, eso sería convergencia de evidencia trans-registro: el tipo de validación que HIT necesita dada su naturaleza transdisciplinar.</p>`
+  },
+  {
+    id:'Epistemologia', label:'Epistemología', subtitle:'De la inconsistencia',
+    cat:'epistemo', sz:14,
+    links:['EvidenciaArquitectura','HIT','PMP','Convergencia','Hipotesis-HIT'],
+    body:`
+<h2>La proposición</h2>
+<blockquote><p>El conocimiento en un programa transdisciplinar se produce siempre a través de registros heterogéneos cuyas relaciones son imperfectas y parciales. La inconsistencia entre registros no es un problema a resolver sino la <strong>condición de posibilidad</strong> de la investigación transdisciplinar.</p></blockquote>
+<h2>Los cuatro registros de HIT</h2>
+<table>
+<tr><th>Registro</th><th>Tipo de afirmación</th><th>Normas propias</th></tr>
+<tr><td>Físico</td><td>Razones, frecuencias, RP</td><td>Física, análisis de señales</td></tr>
+<tr><td>Biológico</td><td>HRV, EEG, RQA</td><td>Neurociencia, fisiología</td></tr>
+<tr><td>Afectivo</td><td>Sensación, homeostasis</td><td>Psicología, fenomenología</td></tr>
+<tr><td>Simbólico</td><td>Material PMP, arquetipos</td><td>Psicología analítica</td></tr>
+</table>
+<h2>Lo que la inconsistencia permite</h2>
+<p>Las tensiones entre registros son informativas. Si la fisiología muestra respuesta al Beacon pero el sujeto no reporta experiencia coherente → la respuesta puede ser subcortical. Si Phideus aprende representaciones armónicas pero no transfieren a biosignales → la estructura existe computacionalmente pero no es directamente legible biológicamente en ese dominio.</p>
+<h2>La distinción empírico / teórico / especulativo</h2>
+<p>HIT exige que cada afirmación sepa en qué tipo está. El PPU es especulativo. El resultado de Phideus E1 es empírico. La cadena razón→recurrencia→eficiencia es teórica con respaldo convergente.</p>`
+  },
+  {
+    id:'EvidenciaArquitectura', label:'Arquitectura de Evidencia', subtitle:'Estructura de validación',
+    cat:'epistemo', sz:12,
+    links:['Hipotesis-HIT','Epistemologia','Phideus','Beacon','Convergencia'],
+    body:`
+<h2>El problema de la evidencia transdisciplinar</h2>
+<p>HIT no puede validarse con un único experimento crítico porque opera en múltiples registros. Su arquitectura de evidencia es acumulativa y convergente.</p>
+<h2>Los tres tipos de respaldo</h2>
+<ul>
+<li><strong>Empírico directo</strong>: Resultados de Phideus E1; futuras líneas de Beacon</li>
+<li><strong>Convergencia indirecta</strong>: Neurociencia subcortical (Bidelman & Krishnan, 2009); Psicoacústica (Schwartz et al.); Ecología acústica (Krause); Sistemas dinámicos (Kuramoto)</li>
+<li><strong>Teórico</strong>: Cadena razón→recurrencia→eficiencia→respuesta biológica</li>
+</ul>
+<h2>Lo que HIT necesita para avanzar</h2>
+<p>Las hipótesis H4 y H5 (conjeturas mayores) requieren evidencia experimental directa del Beacon. La arquitectura actual tiene H1 y H2 con respaldo empírico; H3 parcialmente; H4 y H5 solo con convergencia indirecta.</p>`
+  },
+  {
+    id:'SentidoConsonancia', label:'Sentido de la Consonancia', subtitle:'Origen biológico',
+    cat:'epistemo', sz:12,
+    links:['Consonancia','Recurrencia','Beacon','Hipotesis-HIT','Epistemologia'],
+    body:`
+<h2>La pregunta</h2>
+<p>¿Por qué los sistemas biológicos responden a la consonancia? ¿Es aprendido, innato, o estructuralmente necesario?</p>
+<h2>La hipótesis de la eficiencia predictiva</h2>
+<p>HIT propone que el sentido de la consonancia tiene un origen funcional: los sistemas biológicos evolucionaron preferencia por razones simples porque estas producen patrones más predecibles, reduciendo el costo energético del procesamiento predictivo (cerebro bayesiano).</p>
+<h2>La evidencia subcortical</h2>
+<p>Bidelman & Krishnan (2009) mostraron que el tronco encefálico muestra respuestas diferenciales a consonancia vs. disonancia. Esto sugiere que la sensibilidad a la consonancia no es puramente cultural ni requiere aprendizaje cortical.</p>
+<h2>La pareidolia armónica</h2>
+<p>Una posición escéptica: quizás los sistemas biológicos "ven" armonía donde no la hay sistemáticamente. HIT toma esta posibilidad en serio y la incorpora como control en el diseño experimental.</p>`
+  },
+  {
+    id:'HAT', label:'HAT', subtitle:'Harmonically Aware Technology',
+    cat:'tech', sz:12,
+    links:['Phideus','Beacon','PPU','Aplicaciones','HIT'],
+    body:`
+<h2>¿Qué es HAT?</h2>
+<p><strong>HAT</strong> (Harmonically Aware Technology / Tecnología Consciente de la Armonía) es la orientación de diseño que emerge de HIT: construir espacios, instrumentos y tecnologías con atención explícita a la organización proporcional que producen.</p>
+<h2>El principio HAT</h2>
+<p>Toda tecnología produce campos de interferencia — sonoros, electromagnéticos, rítmicos, informacionales. HAT propone que el diseño de esos campos debería incluir la dimensión armónica como variable explícita.</p>
+<h2>Aplicaciones</h2>
+<ul>
+<li>Arquitectura acústica de espacios (salas, hospitales, escuelas)</li>
+<li>Diseño de interfaces sonoras en tecnología de consumo</li>
+<li>Instrumentos musicales con propiedades armónicas diseñadas</li>
+<li>Entornos terapéuticos basados en campo armónico calibrado</li>
+</ul>`
+  },
+  {
+    id:'PPU', label:'PPU', subtitle:'Proportional Processor Unity',
+    cat:'tech', sz:11,
+    links:['HAT','Phideus','Epistemologia'],
+    body:`
+<h2>¿Qué es el PPU?</h2>
+<p>El <strong>PPU</strong> es una propuesta especulativa de arquitectura computacional: un procesador diseñado para operar nativamente en el espacio de razones proporcionales, en lugar del espacio de enteros o flotantes de los procesadores convencionales.</p>
+<h2>La apuesta especulativa</h2>
+<p>Si la información armónica opera en el dominio de las razones, y si los procesadores actuales representan esas razones de manera ineficiente, entonces un procesador que opere nativamente en ese dominio podría ser más eficiente para ciertas clases de problemas.</p>
+<h2>Estado actual</h2>
+<p>El PPU es especulativo en el sentido epistemológico de HIT: un horizonte intelectual con respaldo indirecto. Requeriría primero demostrar que la representación en espacio de razones produce ventajas computacionales medibles (lo que Phideus está comenzando a hacer en software).</p>`
+  },
+  {
+    id:'Corazofono', label:'Corazófono', subtitle:'Dispositivo de calibración biosignal',
+    cat:'tech', sz:11,
+    links:['Beacon','Consonancia','HAT'],
+    body:`
+<h2>Función</h2>
+<p>El <strong>Corazófono</strong> es el dispositivo de calibración del Beacon: registra las frecuencias de resonancia del tórax del sujeto y genera el perfil armónico individual que sirve para personalizar el campo del Beacon.</p>
+<h2>Por qué es necesario</h2>
+<p>La Consonancia en HIT es una función relacional — depende del receptor. Un Beacon genérico puede no estar en resonancia con el sistema biológico específico del sujeto. El Corazófono resuelve esto.</p>
+<h2>Relación con la Consonancia como función</h2>
+<p>El Corazófono es la implementación técnica de la posición teórica: no hay consonancia "objetiva" desconectada del receptor. Hay consonancia <em>para este sistema en este momento</em>.</p>`
+  },
+  {
+    id:'OpenClaw', label:'OpenClaw', subtitle:'Framework multi-agente open source',
+    cat:'tech', sz:10,
+    links:['Beacon','Phideus'],
+    body:`
+<h2>¿Qué es OpenClaw?</h2>
+<p><strong>OpenClaw</strong> es el framework multi-agente de código abierto que orquesta la tercera generación del Beacon (Digital / OSC Bank).</p>
+<h2>Función en el ecosistema HIT</h2>
+<p>Gestiona la síntesis digital del campo armónico mediante protocolo OSC (Open Sound Control), permitiendo control paramétrico preciso, baja latencia y alta reproducibilidad experimental.</p>
+<p>Al ser open-source, permite que el protocolo experimental del Beacon sea replicable por terceros —un requisito epistemológico central de HIT.</p>`
+  },
+  {
+    id:'Eficiencia', label:'Eficiencia', subtitle:'Armónica e informacional',
+    cat:'tech', sz:11,
+    links:['Recurrencia','Armonianatural','Hipotesis-HIT','HAT'],
+    body:`
+<h2>La hipótesis de eficiencia</h2>
+<p>Razones simples → mayor recurrencia → menor energía correctiva → eficiencia informacional.</p>
+<h2>Eficiencia en qué sentido</h2>
+<p>No eficiencia de compresión en sentido Shannon. La eficiencia es <em>predictiva</em>: un sistema que opera con razones simples puede predecir el estado futuro con menor error residual.</p>
+<h2>Vínculo con H4</h2>
+<p>H4 es la hipótesis de eficiencia aplicada a sistemas biológicos: la exposición a razones simples produce menor carga cognitiva/fisiológica. La eficiencia armónica es la explicación teórica de por qué H4 debería ser cierta.</p>`
+  },
+  {
+    id:'Aplicaciones', label:'Aplicaciones', subtitle:'Salud, ecología, diseño, cultura',
+    cat:'tech', sz:11,
+    links:['HAT','Beacon','HIT'],
+    body:`
+<h2>Derivaciones de HIT (Cap. 16)</h2>
+<h3>Salud y bienestar</h3>
+<p>Protocolos terapéuticos basados en campo armónico calibrado; diseño de entornos hospitalarios; aplicaciones en salud mental combinadas con PMP.</p>
+<h3>Ecología acústica</h3>
+<p>Monitoreo de salud ecosistémica mediante análisis de la estructura armónica de soundscapes naturales; diseño de espacios urbanos acústicamente responsables.</p>
+<h3>Diseño y arquitectura</h3>
+<p>Aplicación del principio HAT en arquitectura, diseño de productos y tecnología de consumo.</p>
+<h3>Cultura y educación</h3>
+<p>Marcos educativos basados en la comprensión proporcional como forma de pensamiento; música como herramienta cognitiva.</p>`
+  }
+];
+
+const BOOK = [
+  { id:'Part-I', n:'I', title:'Introducción', sub:'Motivación y antecedentes', chs:[
+    { id:'Ch01', n:'01', title:'Motivación y Panorama' },
+    { id:'Ch02', n:'02', title:'Antecedentes' }
+  ]},
+  { id:'Part-II', n:'II', title:'Fundamentos', sub:'Ontología de la información armónica', chs:[
+    { id:'Ch03', n:'03', title:'Ontología de la Información Armónica' },
+    { id:'Ch04', n:'04', title:'La Consonancia como Función Relacional' },
+    { id:'Ch05', n:'05', title:'Hipótesis Centrales' }
+  ]},
+  { id:'Part-III', n:'III', title:'Evidencia Empírica', sub:'Convergencia en 7 dominios', chs:[
+    { id:'Ch06', n:'06', title:'Convergencia Empírica' },
+    { id:'Ch07', n:'07', title:'Marco Epistemológico y Metodológico' }
+  ]},
+  { id:'Part-IV', n:'IV', title:'Teoría', sub:'Desarrollo teórico del programa', chs:[
+    { id:'Ch08', n:'08', title:'Armonía Natural como Eficiencia Informacional' },
+    { id:'Ch09', n:'09', title:'El Sentido de la Consonancia' },
+    { id:'Ch10', n:'10', title:'El Problema de la Activación' }
+  ]},
+  { id:'Part-V', n:'V', title:'Sondas Experimentales', sub:'Phideus, Beacon y Convergencia', chs:[
+    { id:'Ch11', n:'11', title:'Phideus — La Sonda Computacional' },
+    { id:'Ch12', n:'12', title:'El Beacon Armónico' },
+    { id:'Ch13', n:'13', title:'Convergencia Phideus–Beacon' }
+  ]},
+  { id:'Part-VI', n:'VI', title:'Horizonte', sub:'Alcance, límites y futuro', chs:[
+    { id:'Ch14', n:'14', title:'Lo que HIT no es' },
+    { id:'Ch15', n:'15', title:'Preguntas Abiertas y Agenda' },
+    { id:'Ch16', n:'16', title:'Aplicaciones y Derivaciones' }
+  ]}
+];
+
+const LINKS = [
+  ['HIT','Intervalo'],['HIT','Consonancia'],['HIT','Hipotesis-HIT'],
+  ['HIT','Phideus'],['HIT','Beacon'],['HIT','Epistemologia'],['HIT','Armonianatural'],
+  ['Intervalo','Consonancia'],['Intervalo','Recurrencia'],['Intervalo','Hipotesis-HIT'],
+  ['Consonancia','SentidoConsonancia'],['Consonancia','Recurrencia'],
+  ['Recurrencia','Eficiencia'],['Armonianatural','Eficiencia'],['Armonianatural','Phideus'],
+  ['Phi','Jpsh'],['Phi','ProblemaActivacion'],['Jpsh','ProblemaActivacion'],
+  ['Jpsh','Beacon'],['ProblemaActivacion','Beacon'],
+  ['Hipotesis-HIT','Phideus'],['Hipotesis-HIT','Beacon'],
+  ['Hipotesis-HIT','Recurrencia'],['Hipotesis-HIT','Eficiencia'],
+  ['Hipotesis-HIT','SentidoConsonancia'],['Hipotesis-HIT','EvidenciaArquitectura'],
+  ['Phideus','Beacon'],['Phideus','Convergencia'],['Phideus','HAT'],['Phideus','PPU'],
+  ['Beacon','Convergencia'],['Beacon','Corazofono'],['Beacon','OpenClaw'],
+  ['PMP','Convergencia'],['PMP','Beacon'],
+  ['HAT','PPU'],['HAT','Aplicaciones'],
+  ['Epistemologia','EvidenciaArquitectura'],
+  ['SentidoConsonancia','Beacon'],
+  ['Convergencia','EvidenciaArquitectura'],
+];
+
+// ================================================================
+// SIDEBAR: COUNTS
+// ================================================================
+const counts = {};
+CONCEPTS.forEach(c => { counts[c.cat] = (counts[c.cat]||0)+1; });
+document.getElementById('cnt-all').textContent = CONCEPTS.length;
+Object.entries(counts).forEach(([k,v]) => {
+  const el = document.getElementById('cnt-'+k);
+  if (el) el.textContent = v;
+});
+
+// ================================================================
+// SIDEBAR: BOOK TREE
+// ================================================================
+const bookTree = document.getElementById('book-tree');
+BOOK.forEach(part => {
+  const wrap = document.createElement('div');
+  wrap.className = 'book-part';
+
+  const row = document.createElement('div');
+  row.className = 'part-row';
+  row.innerHTML = `<span class="part-arrow">▶</span><span>Parte ${part.n} — ${part.title}</span>`;
+  row.addEventListener('click', () => wrap.classList.toggle('open'));
+
+  const chs = document.createElement('div');
+  chs.className = 'part-chs';
+  part.chs.forEach(ch => {
+    const r = document.createElement('div');
+    r.className = 'ch-row';
+    r.innerHTML = `<span class="ch-n">${ch.n}</span>${ch.title}`;
+    r.addEventListener('click', () => openChapter(ch, part));
+    chs.appendChild(r);
+  });
+
+  wrap.appendChild(row);
+  wrap.appendChild(chs);
+  bookTree.appendChild(wrap);
+});
+
+// ================================================================
+// TABS
+// ================================================================
+let activeTab = 'map';
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    document.getElementById('pane-'+activeTab).classList.add('active');
+    if (activeTab === 'map') buildGraph();
+  });
+});
+
+// ================================================================
+// CATEGORY FILTER
+// ================================================================
+let activeCat = 'all';
+document.querySelectorAll('.cat-row').forEach(row => {
+  row.addEventListener('click', () => {
+    document.querySelectorAll('.cat-row').forEach(r => r.classList.remove('active'));
+    row.classList.add('active');
+    activeCat = row.dataset.cat;
+    renderCards();
+    if (activeTab === 'indice') return;
+    if (activeTab === 'map') dimGraph();
+  });
+});
+
+// ================================================================
+// LIBRO VIEW
+// ================================================================
+const partsGrid = document.getElementById('parts-grid');
+BOOK.forEach(part => {
+  const card = document.createElement('div');
+  card.className = 'part-card';
+
+  const head = document.createElement('div');
+  head.className = 'part-card-head';
+  head.innerHTML = `<div class="pnum">${part.n}</div><div class="pinfo"><h3>${part.title}</h3><p>${part.sub}</p></div>`;
+
+  const grid = document.createElement('div');
+  grid.className = 'chs-grid';
+
+  part.chs.forEach(ch => {
+    const c = document.createElement('div');
+    c.className = 'ch-card';
+    c.innerHTML = `<div class="ch-tag">CAP. ${ch.n}</div><div class="ch-title">${ch.title}</div>`;
+    c.addEventListener('click', () => openChapter(ch, part));
+    grid.appendChild(c);
+  });
+
+  card.appendChild(head);
+  card.appendChild(grid);
+  partsGrid.appendChild(card);
+});
+
+// ================================================================
+// ÍNDICE VIEW
+// ================================================================
+const conceptsGrid = document.getElementById('concepts-grid');
+
+function renderCards(filter) {
+  const cat = filter !== undefined ? filter : activeCat;
+  conceptsGrid.innerHTML = '';
+  const list = cat === 'all' ? CONCEPTS : CONCEPTS.filter(c => c.cat === cat);
+  list.forEach(concept => {
+    const card = document.createElement('div');
+    card.className = `concept-card ${concept.cat}`;
+    card.innerHTML = `
+      <div class="cc-label">${concept.label}</div>
+      <div class="cc-sub">${concept.subtitle}</div>
+      <span class="cc-tag ${concept.cat}">${CAT[concept.cat].label}</span>
+    `;
+    card.addEventListener('click', () => openConcept(concept));
+    conceptsGrid.appendChild(card);
+  });
+}
+renderCards();
+
+// ================================================================
+// DETAIL PANEL
+// ================================================================
+const detail = document.getElementById('detail');
+document.getElementById('d-close').addEventListener('click', closeDetail);
+
+function closeDetail() {
+  detail.classList.remove('open');
+  resetGraphHighlight();
+}
+
+function openConcept(concept) {
+  const col = CAT[concept.cat].color;
+  const dCat = document.getElementById('d-cat');
+  dCat.textContent = CAT[concept.cat].label;
+  dCat.style.background = col + '22';
+  dCat.style.color = col;
+
+  document.getElementById('d-title').textContent = concept.label;
+  document.getElementById('d-sub').textContent = concept.subtitle;
+
+  let related = '';
+  if (concept.links && concept.links.length) {
+    const btns = concept.links.map(id => {
+      const c = CONCEPTS.find(x => x.id === id);
+      return `<button class="rel-link" data-id="${id}">${c ? c.label : id}</button>`;
+    }).join('');
+    related = `<div class="related"><div class="related-label">Relacionados</div><div class="related-links">${btns}</div></div>`;
+  }
+
+  document.getElementById('d-body').innerHTML = concept.body + related;
+
+  document.querySelectorAll('.rel-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = CONCEPTS.find(x => x.id === btn.dataset.id);
+      if (c) openConcept(c);
+    });
+  });
+
+  detail.classList.add('open');
+}
+
+function openChapter(ch, part) {
+  const dCat = document.getElementById('d-cat');
+  dCat.textContent = `Parte ${part.n}`;
+  dCat.style.background = 'rgba(120,116,162,0.15)';
+  dCat.style.color = '#7874a2';
+
+  document.getElementById('d-title').textContent = ch.title;
+  document.getElementById('d-sub').textContent = `Capítulo ${ch.n} — ${part.title}`;
+  document.getElementById('d-body').innerHTML = `
+    <p style="color:var(--dim);font-size:11.5px;margin-bottom:18px">${part.title} — ${part.sub}</p>
+    <p>Navega al concepto relacionado en el <strong>Índice</strong> o en el <strong>Mapa</strong> para ver el desarrollo completo.</p>
+  `;
+
+  detail.classList.add('open');
+}
+
+function openConceptById(id) {
+  const c = CONCEPTS.find(x => x.id === id);
+  if (c) openConcept(c);
+}
+
+// ================================================================
+// SEARCH
+// ================================================================
+document.getElementById('search-input').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  if (!q) { renderCards(); return; }
+
+  const results = CONCEPTS.filter(c =>
+    c.label.toLowerCase().includes(q) ||
+    c.subtitle.toLowerCase().includes(q) ||
+    c.body.toLowerCase().includes(q)
+  );
+
+  // Switch to índice tab
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-tab="indice"]').classList.add('active');
+  document.getElementById('pane-indice').classList.add('active');
+  activeTab = 'indice';
+
+  conceptsGrid.innerHTML = '';
+  results.forEach(concept => {
+    const card = document.createElement('div');
+    card.className = `concept-card ${concept.cat}`;
+    card.innerHTML = `
+      <div class="cc-label">${concept.label}</div>
+      <div class="cc-sub">${concept.subtitle}</div>
+      <span class="cc-tag ${concept.cat}">${CAT[concept.cat].label}</span>
+    `;
+    card.addEventListener('click', () => openConcept(concept));
+    conceptsGrid.appendChild(card);
+  });
+});
+
+// ================================================================
+// LEGEND
+// ================================================================
+const legend = document.getElementById('map-legend');
+Object.entries(CAT).forEach(([k, v]) => {
+  const row = document.createElement('div');
+  row.className = 'leg-item';
+  row.innerHTML = `<span class="leg-dot" style="background:${v.color}"></span>${v.label}`;
+  legend.appendChild(row);
+});
+
+// ================================================================
+// FORCE GRAPH
+// ================================================================
+let graphBuilt = false;
+let gNode, gLink, sim;
+
+function buildGraph() {
+  if (graphBuilt) return;
+  graphBuilt = true;
+
+  const el = document.getElementById('pane-map');
+  const W = el.clientWidth;
+  const H = el.clientHeight;
+
+  const svg = d3.select('#fg').attr('viewBox', `0 0 ${W} ${H}`);
+
+  const g = svg.append('g');
+
+  // Zoom/pan
+  const zoom = d3.zoom().scaleExtent([0.25, 4]).on('zoom', ev => g.attr('transform', ev.transform));
+  svg.call(zoom);
+
+  const nodes = CONCEPTS.map(c => ({ ...c }));
+  const links = LINKS.map(([s, t]) => ({ source: s, target: t }));
+
+  sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+      const sn = nodes.find(n => n.id === (d.source.id||d.source));
+      const tn = nodes.find(n => n.id === (d.target.id||d.target));
+      return 55 + ((sn?.sz||10) + (tn?.sz||10)) * 2.2;
+    }).strength(0.4))
+    .force('charge', d3.forceManyBody().strength(d => -d.sz * 22).distanceMax(350))
+    .force('center', d3.forceCenter(W / 2, H / 2).strength(0.05))
+    .force('collision', d3.forceCollide(d => d.sz + 10))
+    .force('x', d3.forceX(W / 2).strength(0.03))
+    .force('y', d3.forceY(H / 2).strength(0.03));
+
+  // Draw links
+  gLink = g.append('g').selectAll('line')
+    .data(links)
+    .join('line')
+    .attr('class', 'g-link');
+
+  // Draw nodes
+  gNode = g.append('g').selectAll('g')
+    .data(nodes)
+    .join('g')
+    .attr('class', 'g-node')
+    .call(d3.drag()
+      .on('start', (ev, d) => { if (!ev.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag', (ev, d) => { d.fx=ev.x; d.fy=ev.y; })
+      .on('end', (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
+    );
+
+  gNode.append('circle')
+    .attr('r', d => d.sz)
+    .attr('fill', d => CAT[d.cat].color + '28')
+    .attr('stroke', d => CAT[d.cat].color)
+    .attr('stroke-width', 1.8)
+    .on('click', (ev, d) => {
+      ev.stopPropagation();
+      openConcept(d);
+      highlightGraph(d);
+    });
+
+  // Main label
+  gNode.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dy', d => d.sz + 13)
+    .attr('font-size', d => Math.max(9, Math.min(12, d.sz * 0.65)))
+    .text(d => d.label);
+
+  // Background click
+  svg.on('click', closeDetail);
+
+  // Tick
+  sim.on('tick', () => {
+    gLink
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y);
+    gNode.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+}
+
+function highlightGraph(d) {
+  if (!gNode) return;
+  const connectedIds = new Set([d.id]);
+  LINKS.forEach(([s, t]) => {
+    if (s === d.id) connectedIds.add(t);
+    if (t === d.id) connectedIds.add(s);
+  });
+  gNode.classed('dimmed', n => !connectedIds.has(n.id));
+  gLink.classed('hi', l =>
+    (l.source.id||l.source) === d.id || (l.target.id||l.target) === d.id
+  );
+}
+
+function resetGraphHighlight() {
+  if (!gNode) return;
+  gNode.classed('dimmed', false);
+  gLink.classed('hi', false);
+}
+
+function dimGraph() {
+  if (!gNode) return;
+  if (activeCat === 'all') { resetGraphHighlight(); return; }
+  gNode.classed('dimmed', n => n.cat !== activeCat);
+  gLink.classed('hi', false);
+}
+
+// Build on load
+buildGraph();
+</script>
+</body>
+</html>
