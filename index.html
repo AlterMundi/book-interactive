@@ -5,31 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HIT — Harmonic Information Theory</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:         #0c0e1a;
-      --surface:    #11131f;
-      --card:       #181b2e;
-      --card-hover: #1e2138;
-      --border:     #252840;
-      --text:       #dcd9ef;
-      --muted:      #7874a2;
-      --dim:        #3f3d60;
-      --nucleo:    #818cf8;
-      --hipotesis: #fbbf24;
-      --activacion:#f87171;
-      --sonda:     #22d3ee;
-      --epistemo:  #fb923c;
-      --tech:      #34d399;
+      --bg:         #0a0a0a;
+      --surface:    #111111;
+      --card:       #161616;
+      --card-hover: #1c1c1c;
+      --border:     #242424;
+      --text:       #ffffff;
+      --muted:      #888888;
+      --dim:        #444444;
+      --nucleo:     #00e5c3;
+      --hipotesis:  #00e5c3;
+      --activacion: #00e5c3;
+      --sonda:      #00e5c3;
+      --epistemo:   #00e5c3;
+      --tech:       #00e5c3;
+      --accent:     #00e5c3;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -45,26 +46,29 @@
       align-items: center;
       gap: 16px;
       padding: 0 28px;
-      background: rgba(11,13,26,0.92);
+      background: rgba(10,10,10,0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
 
     .nav-logo {
-      font-family: 'Crimson Pro', serif;
-      font-size: 19px;
-      font-weight: 600;
-      color: var(--nucleo);
-      letter-spacing: 0.03em;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
       white-space: nowrap;
       flex-shrink: 0;
     }
     .nav-logo em {
       font-style: normal;
-      font-weight: 300;
+      font-weight: 400;
       font-size: 11px;
       color: var(--muted);
       margin-left: 10px;
+      letter-spacing: 0.02em;
+      text-transform: none;
     }
 
     .nav-links {
@@ -86,7 +90,7 @@
       white-space: nowrap;
     }
     .nav-btn:hover { background: var(--card); color: var(--text); }
-    .nav-btn.active { background: var(--card); color: var(--nucleo); font-weight: 500; }
+    .nav-btn.active { background: var(--card); color: var(--accent); font-weight: 600; }
 
     /* ── SECTIONS ────────────────────────────────── */
     section { display: none; }
@@ -167,44 +171,47 @@
 
     .hero-tag {
       display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--nucleo);
-      background: rgba(129,140,248,.12);
+      color: var(--accent);
+      border: 1px solid rgba(0,229,195,.25);
       padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 20px;
+      border-radius: 2px;
+      margin-bottom: 22px;
     }
 
     .hero-title {
-      font-family: 'Crimson Pro', serif;
-      font-size: 52px;
-      font-weight: 600;
-      line-height: 1.1;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, var(--text) 0%, var(--nucleo) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 58px;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .hero-title .accent {
+      color: var(--accent);
     }
 
     .hero-sub {
-      font-family: 'Crimson Pro', serif;
-      font-size: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
       font-weight: 400;
-      font-style: italic;
       color: var(--muted);
+      letter-spacing: 0.06em;
       margin-bottom: 24px;
     }
 
     .hero-desc {
       font-size: 14px;
       color: var(--muted);
-      line-height: 1.7;
+      line-height: 1.75;
       margin-bottom: 36px;
-      max-width: 480px;
+      max-width: 460px;
+      font-weight: 300;
     }
 
     .hero-ctas {
@@ -214,32 +221,38 @@
     }
 
     .btn-primary {
-      padding: 11px 24px;
-      background: var(--nucleo);
-      color: #0c0e1a;
+      padding: 11px 28px;
+      background: var(--accent);
+      color: #000000;
       border: none;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
+      border-radius: 2px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: opacity 0.15s, transform 0.15s;
     }
-    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
 
     .btn-secondary {
-      padding: 11px 24px;
+      padding: 11px 28px;
       background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 500;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
     }
-    .btn-secondary:hover { border-color: var(--nucleo); color: var(--nucleo); }
+    .btn-secondary:hover { background: rgba(0,229,195,.08); }
 
     /* Stats strip */
     .hero-stats {
@@ -253,12 +266,13 @@
 
     .stat { display: flex; flex-direction: column; gap: 2px; }
     .stat-n {
-      font-family: 'Crimson Pro', serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 28px;
-      font-weight: 600;
-      color: var(--nucleo);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.01em;
     }
-    .stat-l { font-size: 11px; color: var(--muted); }
+    .stat-l { font-size: 10.5px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
 
     /* ── DESCARGAR ───────────────────────────────── */
     #s-descargar {
@@ -269,9 +283,10 @@
     }
 
     .section-title {
-      font-family: 'Crimson Pro', serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 34px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       margin-bottom: 8px;
     }
 
@@ -291,41 +306,39 @@
     .dl-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 2px;
       padding: 28px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, transform 0.2s;
     }
-    .dl-card:hover { border-color: var(--nucleo); }
+    .dl-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 
     .dl-icon {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: 2px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 20px;
+      background: rgba(0,229,195,.08);
     }
-    .dl-icon.pdf  { background: rgba(248,113,113,.12); color: #f87171; }
-    .dl-icon.md   { background: rgba(129,140,248,.12); color: var(--nucleo); }
-    .dl-icon.tex  { background: rgba(52,211,153,.12);  color: var(--tech); }
 
-    .dl-label { font-size: 16px; font-weight: 600; }
-    .dl-desc  { font-size: 12.5px; color: var(--muted); line-height: 1.6; flex: 1; }
+    .dl-label { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+    .dl-desc  { font-size: 12.5px; color: var(--muted); line-height: 1.65; flex: 1; }
 
     .dl-badge {
       display: inline-block;
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 20px;
-      background: rgba(251,191,36,.14);
-      color: var(--hipotesis);
+      padding: 2px 8px;
+      border-radius: 2px;
+      border: 1px solid rgba(0,229,195,.3);
+      color: var(--accent);
       margin-bottom: 4px;
     }
 
@@ -334,30 +347,33 @@
       width: 100%;
       padding: 10px;
       text-align: center;
-      border-radius: 8px;
+      border-radius: 2px;
       border: 1px solid var(--border);
       background: transparent;
       color: var(--text);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 500;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       cursor: pointer;
       text-decoration: none;
       transition: all 0.15s;
       margin-top: auto;
     }
-    .dl-btn:hover { border-color: var(--nucleo); color: var(--nucleo); }
-    .dl-btn.primary { background: var(--nucleo); color: #0c0e1a; border-color: transparent; font-weight: 600; }
-    .dl-btn.primary:hover { opacity: 0.88; }
+    .dl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .dl-btn.primary { background: var(--accent); color: #000000; border-color: transparent; }
+    .dl-btn.primary:hover { opacity: 0.85; color: #000000; }
 
     .preventa-banner {
-      background: linear-gradient(135deg, rgba(129,140,248,.1), rgba(251,191,36,.08));
-      border: 1px solid rgba(129,140,248,.25);
-      border-radius: 14px;
+      background: rgba(0,229,195,.04);
+      border: 1px solid rgba(0,229,195,.2);
+      border-radius: 2px;
       padding: 28px 32px;
       display: flex;
       align-items: center;
       gap: 24px;
+      flex-wrap: wrap;
     }
 
     .preventa-text h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
@@ -382,39 +398,42 @@
     .author-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 2px;
       padding: 28px;
       display: flex;
       flex-direction: column;
       gap: 16px;
       transition: border-color 0.2s;
     }
-    .author-card:hover { border-color: var(--nucleo); }
+    .author-card:hover { border-color: var(--accent); }
 
     .author-avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--nucleo), var(--sonda));
+      width: 52px;
+      height: 52px;
+      border-radius: 2px;
+      background: rgba(0,229,195,.1);
+      border: 1px solid rgba(0,229,195,.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Crimson Pro', serif;
-      font-size: 22px;
-      font-weight: 600;
-      color: #0c0e1a;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
       flex-shrink: 0;
+      letter-spacing: 0.04em;
     }
 
     .author-head { display: flex; align-items: center; gap: 14px; }
 
-    .author-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-    .author-role { font-size: 11.5px; color: var(--nucleo); }
+    .author-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
+    .author-role { font-size: 10.5px; color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase; }
 
     .author-bio {
       font-size: 13px;
       color: var(--muted);
       line-height: 1.7;
+      font-weight: 300;
     }
 
     .author-links { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -428,10 +447,11 @@
       text-decoration: none;
       padding: 4px 10px;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 2px;
       transition: all 0.15s;
+      font-family: 'Space Mono', monospace;
     }
-    .author-link:hover { color: var(--nucleo); border-color: var(--nucleo); }
+    .author-link:hover { color: var(--accent); border-color: var(--accent); }
 
     /* ── LIBRO INTERACTIVO ───────────────────────── */
     #s-libro {
@@ -472,11 +492,11 @@
       align-items: center;
       gap: 6px;
     }
-    .qa-toggle:hover, .qa-toggle.active { border-color: var(--nucleo); color: var(--nucleo); }
+    .qa-toggle:hover, .qa-toggle.active { border-color: var(--accent); color: var(--accent); }
     .qa-toggle .dot {
       width: 6px; height: 6px;
       border-radius: 50%;
-      background: var(--nucleo);
+      background: var(--accent);
       opacity: 0;
       transition: opacity 0.2s;
     }
@@ -546,25 +566,27 @@
       padding: 9px 12px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 2px;
       color: var(--text);
-      font-family: inherit;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 13px;
       outline: none;
       transition: border-color 0.2s;
     }
-    .qa-input:focus { border-color: var(--nucleo); }
+    .qa-input:focus { border-color: var(--accent); }
     .qa-input::placeholder { color: var(--dim); }
 
     .qa-ask-btn {
       padding: 9px 14px;
-      background: var(--nucleo);
-      color: #0c0e1a;
+      background: var(--accent);
+      color: #000000;
       border: none;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 600;
+      border-radius: 2px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: opacity 0.15s;
       white-space: nowrap;
@@ -576,15 +598,15 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
-    .qa-results::-webkit-scrollbar { width: 3px; }
-    .qa-results::-webkit-scrollbar-thumb { background: var(--border); }
+    .qa-results::-webkit-scrollbar { width: 2px; }
+    .qa-results::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 1px; }
 
     .qa-result {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 2px;
       overflow: hidden;
     }
 
@@ -631,7 +653,7 @@
     .qa-result-body li { margin-bottom: 3px; }
     .qa-result-body strong { color: var(--text); font-weight: 500; }
     .qa-result-body blockquote {
-      border-left: 2px solid var(--nucleo);
+      border-left: 2px solid var(--accent);
       padding-left: 10px;
       color: var(--muted);
       margin: 8px 0;
@@ -663,7 +685,7 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .qa-pill:hover { border-color: var(--nucleo); color: var(--nucleo); }
+    .qa-pill:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ── MÁS INFO ────────────────────────────────── */
     #s-info {
@@ -703,13 +725,13 @@
       padding: 14px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 2px;
       text-decoration: none;
       color: var(--text);
       font-size: 13px;
       transition: border-color 0.2s;
     }
-    .info-repo:hover { border-color: var(--nucleo); }
+    .info-repo:hover { border-color: var(--accent); }
 
     .info-repo svg { width: 20px; height: 20px; fill: var(--muted); flex-shrink: 0; }
 
@@ -721,38 +743,52 @@
       gap: 10px;
     }
 
-    .contact-label { font-size: 10.5px; color: var(--dim); width: 60px; flex-shrink: 0; }
+    .contact-label {
+      font-size: 9.5px;
+      color: var(--dim);
+      width: 60px;
+      flex-shrink: 0;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
 
     .contact-link {
       font-size: 13px;
       color: var(--muted);
       text-decoration: none;
       transition: color 0.15s;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
     }
-    .contact-link:hover { color: var(--nucleo); }
+    .contact-link:hover { color: var(--accent); }
 
     .altermundi-banner {
-      background: linear-gradient(135deg, rgba(129,140,248,.07), rgba(34,211,238,.05));
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      background: rgba(0,229,195,.03);
+      border: 1px solid rgba(0,229,195,.15);
+      border-radius: 2px;
       padding: 32px;
       display: flex;
       align-items: center;
       gap: 28px;
+      flex-wrap: wrap;
     }
 
     .altermundi-logo {
-      font-family: 'Crimson Pro', serif;
-      font-size: 28px;
-      font-weight: 600;
-      color: var(--nucleo);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
       flex-shrink: 0;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .altermundi-text p {
       font-size: 13px;
       color: var(--muted);
       line-height: 1.7;
+      font-weight: 300;
     }
 
     /* ── RESPONSIVE ──────────────────────────────── */
@@ -805,8 +841,8 @@
 
     <div class="hero-text">
       <div class="hero-tag">Programa de investigación transdisciplinar</div>
-      <h1 class="hero-title">Harmonic<br>Information Theory</h1>
-      <p class="hero-sub">Fundamentos v2.0</p>
+      <h1 class="hero-title">Harmonic<br><span class="accent">Information</span> Theory</h1>
+      <p class="hero-sub">// Fundamentos v2.0 · 2026</p>
       <p class="hero-desc">
         ¿Pueden las relaciones proporcionales entre frecuencias constituir un nivel de organización informacional irreductible al nivel de los elementos individuales? HIT construye un programa investigativo con hipótesis falsificables, sondas empíricas y marcos epistemológicos explícitos.
       </p>
@@ -901,7 +937,7 @@
 
     <div class="author-card">
       <div class="author-head">
-        <div class="author-avatar" style="background: linear-gradient(135deg, var(--sonda), var(--tech));">NE</div>
+        <div class="author-avatar">NE</div>
         <div>
           <div class="author-name">Nicolás Echániz</div>
           <div class="author-role">Investigador · AlterMundi</div>
